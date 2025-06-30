@@ -28,8 +28,12 @@ export const signUpUser = async (req, res, next) => {
 
 export const fetchUser = async (req, res, next) => {
     try {
-        const { id } = req.query;
-        const found = await User.findById(id).select('-password');
+        const { email } = req.query;
+        if(!email){
+            return res.status.status(400).json({message: 'Missing Email query parameter'});
+        }
+        
+        const found = await User.findOne({email}).select('-password');
         if (!found) return res.status(404).json({ message: 'User not found' });
             res.json(found);
     } catch (err) {

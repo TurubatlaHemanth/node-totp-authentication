@@ -27,7 +27,8 @@ const userSchema = mongoose.Schema({
         default: Date.now,
     },
     isActive:{
-        type: Boolean
+        type: Boolean,
+        default: false
     }
 });
 
