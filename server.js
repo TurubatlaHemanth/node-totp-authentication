@@ -1,6 +1,7 @@
 import express from "express";
 import { connectDB } from "./config/mongoDb.js";
 import userRouter from "./routes/user.routes.js";
+import taskRouter from "./routes/tasks.routes.js";
 
 const app = express();
 const port = 5000;
@@ -20,6 +21,7 @@ const contextPath = "/api/v1";
 app.use(contextPath,rbac);
 
 rbac.use('/user', userRouter) // Routes useRoute ...!
+rbac.use('/task', taskRouter) // Tasks useRoute ...!
 
 app.use((err, req, res, next) => {
   console.error(err);

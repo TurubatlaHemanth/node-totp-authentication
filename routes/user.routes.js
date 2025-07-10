@@ -3,7 +3,7 @@ import { deleteUser, fetchUser, signUpUser, updateUser, fetchAllUser } from '../
 
 const userRouter = express.Router();
 
-/* *************** USER ROUTES *************** */
+/* *************** USER CRUD ROUTES *************** */
 
 userRouter.post('/sign-up',      signUpUser);
 userRouter.get('/getUser',       fetchUser);

@@ -1,6 +1,9 @@
 import { mongoose } from 'mongoose';
 import User from '../models/userSchema.js';
 
+/** ###################################### User EndPoints ###################################### **/
+
+/** Sign Up User */
 export const signUpUser   =  async (req, res, next) => {
     try {
         const { userName, email, password } = req.body;
@@ -27,6 +30,7 @@ export const signUpUser   =  async (req, res, next) => {
   }
 };
 
+/** Fetch User */
 export const fetchUser    =  async (req, res, next) => {
     try {
         
@@ -46,6 +50,7 @@ export const fetchUser    =  async (req, res, next) => {
     }
 };
 
+/** Delete User */
 export const deleteUser   =  async (req, res, next) => {
 
         try {
@@ -68,6 +73,7 @@ export const deleteUser   =  async (req, res, next) => {
 
 };
 
+/** Update User */
 export const updateUser   =  async (req, res, next) => {
   try {
         const { id, email } = req.query;
@@ -96,7 +102,8 @@ export const updateUser   =  async (req, res, next) => {
         }
 };
 
-export const fetchAllUser = async (req, res, next) => {
+/** Fetch All Users */
+export const fetchAllUser = async (req, res, next) =>  {
     try {
         const allUsers = await User.find({}).select('-password'); 
         if (!allUsers || allUsers.length === 0) { 
