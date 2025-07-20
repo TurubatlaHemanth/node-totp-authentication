@@ -1,22 +1,20 @@
 import express from 'express';
-import taskSchema from '../models/taskSchema.js';
 import tasks from '../models/taskSchema.js';
 
 /** ###################################### Task EndPoints ###################################### **/
 
 /** Create Task */
-export const createTask = async (req, res, next) => {
+export const createTask    = async (req, res, next) => {
     try{
             const taskBody = req.body
-            console.log(taskBody)
             const { taskName } = req.body;
             if (!taskName) {
                 return res.status(400).json({ message: " Invalid taskName." });
             }
-            if (await taskSchema.findOne({ taskName  })) {
+            if (await tasks.findOne({ taskName  })) {
                 return res.status(400).json({ message: "User already exists" });
             }
-            const newTask = new taskSchema( taskBody );
+            const newTask = new tasks( taskBody );
             const savedTask = await newTask.save();
 
             const userResponse = savedTask.toObject()
@@ -28,7 +26,7 @@ export const createTask = async (req, res, next) => {
 }
 
 /** Find Task */
-export const findTask   = async(req, res, next)  => {
+export const findTask      = async (req, res, next) => {
 
     try{
 
@@ -50,7 +48,7 @@ export const findTask   = async(req, res, next)  => {
 }
 
 /** Delete Task */
-export const deleteTask   = async(req, res, next) => {
+export const deleteTask    = async (req, res, next) => {
     try{
         const { taskName, id } = req.query;
         const lookupField = taskName ? 'taskName' : id ? '_id' : null ;
@@ -68,3 +66,16 @@ export const deleteTask   = async(req, res, next) => {
         next(error)
     }
 }
+
+/** Fetch All Tasks */
+export const fetchAllTasks = async (req, res, next) =>  {
+    try {
+        const allTasks = await tasks.find({}); 
+        if (!allTasks || allTasks.length === 0) { 
+            return res.status(404).json({ message: 'No Tasks' });
+        }
+        return res.status(200).json(allTasks); 
+    } catch (err) {
+        next(err); 
+    }
+};

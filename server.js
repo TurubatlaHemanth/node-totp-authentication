@@ -2,11 +2,14 @@ import express from "express";
 import { connectDB } from "./config/mongoDb.js";
 import userRouter from "./routes/user.routes.js";
 import taskRouter from "./routes/tasks.routes.js";
+import cookieParser from 'cookie-parser';
+import roleRouter from "./routes/role.route.js";
 
 const app = express();
 const port = 5000;
 const rbac = express.Router();
 app.use(express.json());
+app.use(cookieParser())
 
 connectDB()
   .then(val => console.log('MongoDB connected:', val))
@@ -20,8 +23,9 @@ app.listen(port, () => console.log(`Listening on port ${port}`));
 const contextPath = "/api/v1";
 app.use(contextPath,rbac);
 
-rbac.use('/user', userRouter) // Routes useRoute ...!
-rbac.use('/task', taskRouter) // Tasks useRoute ...!
+rbac.use('/user', userRouter) // User Route ...!
+rbac.use('/task', taskRouter) // Tasks Route ...!
+// rbac.use('/role', roleRouter) // Roles Route ...!
 
 app.use((err, req, res, next) => {
   console.error(err);
