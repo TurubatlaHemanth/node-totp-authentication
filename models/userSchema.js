@@ -27,6 +27,13 @@ const userSchema = mongoose.Schema({
     isActive:{
         type: Boolean,
         default: false
+    },
+    totpVerified: {
+      type: Boolean,
+      default: false,
+    },
+    totpSecret: {
+      type: String,
     }
 });
 
