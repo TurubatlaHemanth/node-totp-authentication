@@ -2,17 +2,17 @@ import Role from '../models/Role';
 
 /** ###################################### Roles EndPoints ###################################### **/
 
-// Create Role
+/** Create Role */
 export const createRole    = async (req, res, next) => {
   try {
-    const { name, permissions } = req.body;
-    if (!name || !Array.isArray(permissions)) {
-      return res.status(400).json({ message: "Invalid name or permissions" });
+    const { name, description } = req.body;
+    if (!name) {
+      return res.status(400).json({ message: "Invalid name" });
     }
     if (await Role.findOne({ name })) {
       return res.status(400).json({ message: "Role already exists" });
     }
-    const newRole = new Role({ name, permissions });
+    const newRole = new Role({ name, description });
     const saved = await newRole.save();
     res.status(201).json({ message: "Role created", role: saved });
   } catch (err) {
@@ -20,7 +20,7 @@ export const createRole    = async (req, res, next) => {
   }
 };
 
-// Find Role
+/** Find Role */
 export const findRole      = async (req, res, next) => {
   try {
     const { name, id } = req.query;
@@ -40,7 +40,7 @@ export const findRole      = async (req, res, next) => {
   }
 };
 
-// Delete Role
+/** Delete Role */ 
 export const deleteRole    = async (req, res, next) => {
   try {
     const { name, id } = req.query;
@@ -60,12 +60,41 @@ export const deleteRole    = async (req, res, next) => {
   }
 };
 
-// Fetch All Roles
+/** Fetch All Roles */
 export const fetchAllRoles = async (req, res, next) => {
   try {
     const all = await Role.find({});
     if (!all.length) return res.status(404).json({ message: 'No roles' });
     res.status(200).json(all);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/** Update Role */
+export const updateRole = async (req, res, next) => {
+  try {
+        const { name, id } = req.query;
+        const { ...updates } = req.body;
+    const lookup = id ? { _id: id } : email ? { email } : null;
+
+    if (!lookup) {
+      return res.status(400).json({ message: "Please Provide Name" });
+    }
+    if (lookup._id && !mongoose.Types.ObjectId.isValid(lookup._id)) {
+      return res.status(400).json({ message: "Invalid ID format." });
+    }
+    
+        const updated = await User.findOneAndUpdate(
+          lookup,
+          { $set: updates },
+          { new: true, runValidators: true }
+        )
+    
+    if (!updated) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res.json(updatedTask)
   } catch (err) {
     next(err);
   }

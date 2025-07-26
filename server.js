@@ -25,7 +25,7 @@ app.use(contextPath,rbac);
 
 rbac.use('/user', userRouter) // User Route ...!
 rbac.use('/task', taskRouter) // Tasks Route ...!
-// rbac.use('/role', roleRouter) // Roles Route ...!
+rbac.use('/role', roleRouter) // Roles Route ...!
 
 app.use((err, req, res, next) => {
   console.error(err);

@@ -27,7 +27,6 @@ export const createTask    = async (req, res, next) => {
 
 /** Find Task */
 export const findTask      = async (req, res, next) => {
-
     try{
 
         const { taskName, id } = req.query;
