@@ -3,7 +3,7 @@ import Role from '../models/Role';
 /** ###################################### Roles EndPoints ###################################### **/
 
 // Create Role
-export const createRole = async (req, res, next) => {
+export const createRole    = async (req, res, next) => {
   try {
     const { name, permissions } = req.body;
     if (!name || !Array.isArray(permissions)) {
@@ -21,7 +21,7 @@ export const createRole = async (req, res, next) => {
 };
 
 // Find Role
-export const findRole = async (req, res, next) => {
+export const findRole      = async (req, res, next) => {
   try {
     const { name, id } = req.query;
     const lookupField = name ? 'name' : id ? '_id' : null;
@@ -41,7 +41,7 @@ export const findRole = async (req, res, next) => {
 };
 
 // Delete Role
-export const deleteRole = async (req, res, next) => {
+export const deleteRole    = async (req, res, next) => {
   try {
     const { name, id } = req.query;
     const lookupField = name ? 'name' : id ? '_id' : null;

@@ -24,7 +24,7 @@ const userSchema = mongoose.Schema({
         type: Date,
         default: Date.now,
     },
-    isActive:{
+    isActive: {
         type: Boolean,
         default: false
     },
@@ -34,6 +34,9 @@ const userSchema = mongoose.Schema({
     },
     totpSecret: {
       type: String,
+    },
+    isTotpEnabled: {
+      type: Boolean
     }
 });
 
