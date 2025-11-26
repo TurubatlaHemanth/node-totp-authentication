@@ -1,5 +1,5 @@
-import express from 'express';
 import tasks from '../models/taskSchema.js';
+import { mongoose } from "mongoose";
 
 /** ###################################### Task EndPoints ###################################### **/
 
@@ -59,7 +59,7 @@ export const deleteTask    = async (req, res, next) => {
 
         const found = await tasks.deleteOne({[lookupField] : lookUpValue }).select('-description');
         if (!found.deletedCount) return res.status(404).json({ message: 'Task not found' });
-            res.json(found);
+           res.json({ message: 'Task deleted' });
 
     }catch(error){
         next(error)

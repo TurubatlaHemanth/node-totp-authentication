@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const roleSchema = new mongoose.Schema({
-  name: {
+  role: {
     type: String,
     required: true,
     unique: true,

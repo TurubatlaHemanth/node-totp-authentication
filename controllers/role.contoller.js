@@ -1,18 +1,19 @@
-import Role from '../models/Role';
+import Role from '../models/roleSchema.js';
+import { mongoose } from "mongoose";
 
 /** ###################################### Roles EndPoints ###################################### **/
 
 /** Create Role */
 export const createRole    = async (req, res, next) => {
   try {
-    const { name, description } = req.body;
-    if (!name) {
-      return res.status(400).json({ message: "Invalid name" });
+    const { role, description } = req.body;
+    if (!role) {
+      return res.status(400).json({ message: "Invalid role" });
     }
-    if (await Role.findOne({ name })) {
+    if (await Role.findOne({ role })) {
       return res.status(400).json({ message: "Role already exists" });
     }
-    const newRole = new Role({ name, description });
+    const newRole = new Role({ role, description });
     const saved = await newRole.save();
     res.status(201).json({ message: "Role created", role: saved });
   } catch (err) {
@@ -23,15 +24,16 @@ export const createRole    = async (req, res, next) => {
 /** Find Role */
 export const findRole      = async (req, res, next) => {
   try {
-    const { name, id } = req.query;
-    const lookupField = name ? 'name' : id ? '_id' : null;
-    const value = name || id;
+    const { role, id } = req.query;
+    const lookupField = role ? 'role' : id ? '_id' : null;
+    const value = role || id;
     if (!lookupField) {
-      return res.status(400).json({ message: 'Provide name or id' });
+      return res.status(400).json({ message: 'Provide role or id' });
     }
     if (lookupField === '_id' && !mongoose.Types.ObjectId.isValid(value)) {
       return res.status(400).json({ message: 'Invalid ID' });
     }
+
     const found = await Role.findOne({ [lookupField]: value });
     if (!found) return res.status(404).json({ message: 'Role not found' });
     res.json(found);
@@ -43,11 +45,11 @@ export const findRole      = async (req, res, next) => {
 /** Delete Role */ 
 export const deleteRole    = async (req, res, next) => {
   try {
-    const { name, id } = req.query;
-    const lookupField = name ? 'name' : id ? '_id' : null;
-    const value = name || id;
+    const { role, id } = req.query;
+    const lookupField = role ? 'role' : id ? '_id' : null;
+    const value = role || id;
     if (!lookupField) {
-      return res.status(400).json({ message: 'Provide name or id' });
+      return res.status(400).json({ message: 'Provide role or id' });
     }
     if (lookupField === '_id' && !mongoose.Types.ObjectId.isValid(value)) {
       return res.status(400).json({ message: 'Invalid ID' });
@@ -72,29 +74,100 @@ export const fetchAllRoles = async (req, res, next) => {
 };
 
 /** Update Role */
+// export const updateRole = async (req, res, next) => {
+//   try {
+//     const { id } = req.query;
+//     const { role, description } = req.body;
+
+//     // Determine lookup field dynamically
+//     const lookup = id ? { _id: id } : role ? { role: role } : null;
+
+//     if (!lookup) {
+//       return res.status(400).json({ message: 'Please provide either role ID or existing role role in query' });
+//     }
+
+//     if (id && !mongoose.Types.ObjectId.isValid(id)) {
+//       return res.status(400).json({ message: 'Invalid ID format.' });
+//     }
+
+//     const updates = {};
+//     if (role) updates.role = role;
+//     if (description) updates.description = description;
+
+//     // Prevent duplicate role conflicts
+//     if (role) {
+//       const existing = await Role.findOne({ role });
+//       if (existing && existing._id.toString() !== (id || existing._id.toString())) {
+//         return res.status(400).json({ message: 'New role role already in use' });
+//       }
+//     }
+
+//     const updated = await Role.findOneAndUpdate(
+//       lookup,
+//       { $set: updates },
+//       { new: true, runValidators: true }
+//     );
+
+//     if (!updated) {
+//       return res.status(404).json({ message: 'Role not found' });
+//     }
+
+//     return res.json({ message: 'Role updated successfully', updated });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 export const updateRole = async (req, res, next) => {
   try {
-        const { name, id } = req.query;
-        const { ...updates } = req.body;
-    const lookup = id ? { _id: id } : email ? { email } : null;
+    const { id } = req.query;
+    const { role: newRole, description } = req.body;
 
-    if (!lookup) {
-      return res.status(400).json({ message: "Please Provide Name" });
+    let filter = null;
+    if (id) {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: 'Invalid ID format' });
+      }
+      filter = { _id: id };
+    } else if (newRole) {
+      filter = { role: newRole };
     }
-    if (lookup._id && !mongoose.Types.ObjectId.isValid(lookup._id)) {
-      return res.status(400).json({ message: "Invalid ID format." });
+
+    if (!filter) {
+      return res.status(400).json({
+        message: 'Missing identifier: provide "id" in query or "role" in body'
+      });
     }
+
+    const updates = {};
+    if (description) updates.description = description;
     
-        const updated = await User.findOneAndUpdate(
-          lookup,
-          { $set: updates },
-          { new: true, runValidators: true }
-        )
-    
-    if (!updated) {
-      return res.status(404).json({ message: "User not found" });
+
+    let changingRole = false;
+    if (newRole && newRole !== filter.role) {
+      changingRole = true;
+      updates.role = newRole;
     }
-    return res.json(updatedTask)
+
+    const existing = await Role.findOne(filter);
+    if (!existing) {
+      return res.status(404).json({ message: 'Role not found with given identifier' });
+    }
+
+    if (changingRole) {
+      const conflict = await Role.findOne({ role: newRole });
+      if (conflict && conflict._id.toString() !== existing._id.toString()) {
+        return res.status(400).json({ message: 'Role name already in use' });
+      }
+    }
+
+    const updated = await Role.findOneAndUpdate(
+      filter,
+      { $set: updates },
+      { new: true, runValidators: true }
+    );
+
+    return res.json({ message: 'Role updated successfully', updated });
   } catch (err) {
     next(err);
   }
