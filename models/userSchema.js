@@ -33,7 +33,7 @@ const userSchema = mongoose.Schema({
       default: false,
     },
     totpSecret: {
-      type: String,
+      type: String
     },
     isTotpEnabled: {
       type: Boolean

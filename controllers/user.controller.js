@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import User from "../models/userSchema.js";
 import { authenticator } from "otplib";
 import qrCode from "qrcode";
+import { json } from "express";
 
 /** ###################################### User EndPoints ###################################### **/
 
@@ -22,28 +23,17 @@ export const signUpUser  = async (req, res, next) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const secret = authenticator.generateSecret();
-
     const newUser = new User({
       userName,
       email,
       password,
-      totpSecret: secret,
-      totpVerified: false,
       isTotpEnabled: false,
+      isActive: false,
     });
-    const savedUser = await newUser.save();
-
-    const otpauthUrl = authenticator.keyuri(email, "YourAppName", secret);
-    const qrCodeDataUrl = await qrCode.toDataURL(otpauthUrl);
-
-    const userObj = savedUser.toObject();
-    delete userObj.password;
+      const savedUser = await newUser.save();
 
     res.status(201).json({
       message: "User created successfully",
-      user: userObj,
-      totp: { secret, otpauthUrl, qrCodeDataUrl },
     });
   } catch (err) {
     next(err);
@@ -68,12 +58,18 @@ export const loginUser   = async (req, res, next) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // If 2FA is disabled, proceed to generate JWT
-    if (!user.isTotpEnabled)
-      return res.status(200).json({ message: "Login successful", twoFactorAuth: false });
 
-    // Password correct, but TOTP enabled
-    return res.status(200).json({ message: "2FA required", twoFactorAuth: true });
+    if(!user.isTotpEnabled){
+      const secret = authenticator.generateSecret();
+      user.totpSecret = secret;
+      user.save();
+      
+      const otpauthUrl = authenticator.keyuri(email, "RBACAuth", secret);
+      const qrCodeDataUrl = await qrCode.toDataURL(otpauthUrl);
+      return res.status(200).json({message:"Created user successfully ",qrImage:qrCodeDataUrl})
+    }
+    return res.status(200).json({message:"Continue with totp verfication"})
+
   } catch (err) {
     next(err);
   }

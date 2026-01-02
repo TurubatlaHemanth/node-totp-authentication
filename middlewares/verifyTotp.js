@@ -5,24 +5,35 @@ import jwt from 'jsonwebtoken'
 export const verifyTotp = async (req, res, next) => {
   try {
 
+    console.log("Reached verifyTotp")
+
     const { email, token } = req.body;
     if (!email || !token) return res.status(400).json({ message: "Email and TOTP token are required" });
 
     const user = await User.findOne({ email });
-    if (!user || !user.isTotpEnabled) return res.status(401).json({ message: "Unauthorized" });
-
-    const verified = speakeasy.totp.verify({
+    const verifyToken = speakeasy.totp.verify({
       secret: user.totpSecret,
       encoding: 'base32',
       token,
       window: 1
     });
+    if (verifyToken && !user.isTotpEnabled){
+        user.isTotpEnabled=true;
+        user.active=true;
+        user.save();
+    }
 
-    if (!verified) return res.status(401).json({ message: "Invalid TOTP code" });
+  console.log("Verifying the token",verifyToken)
+  if (!verifyToken) return res.status(401).json({ message: "Invalid TOTP code" });
 
-    // Generate JWT on successful verification
-    const jwtToken = jwt.sign({ sub: user._id, userEmail: user.email }, process.env.JWT_SECRET, { expiresIn: process.env.TOKEN_EXPIRY });
-    return res.cookie('access_token', jwtToken, { httpOnly: true }).json({ message: "Login successful", token: jwtToken });
+  if(verifyToken && !user.isActive) return res.status(400).json({message:"User is InActive"})
+  
+  return res.status(200).json({message: "Login successfully."})
+
+
+    // // Generate JWT on successful verification
+    // const jwtToken = jwt.sign({ sub: user._id, userEmail: user.email }, process.env.JWT_SECRET, { expiresIn: process.env.TOKEN_EXPIRY });
+    // return res.cookie('access_token', jwtToken, { httpOnly: true }).json({ message: "Login successful", jwt_token: jwtToken });
 
   } catch (err) {
     next(err);
