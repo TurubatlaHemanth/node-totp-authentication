@@ -11,6 +11,7 @@ import { json } from "express";
 export const signUpUser  = async (req, res, next) => {
   try {
     const { userName, email, password } = req.body;
+    
     if (!userName || !email || !password) {
       return res.status(400).json({ message: "Username, email and password are required" });
     }
@@ -81,7 +82,6 @@ export const fetchUser   = async (req, res, next) => {
     const { email, id } = req.query;
     const lookupField = email ? "email" : id ? "_id" : null;
     const lookUpValue = email ? email : id;
-    console.log(email);
     if (
       !lookupField === "_id" && !mongoose.Types.objectId.isValid(lookUpValue)
     ) {

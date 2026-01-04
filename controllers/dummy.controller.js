@@ -10,7 +10,6 @@ import Item from "../models/dummymodels.js";
     const items = await Item.find().skip(skip).limit(limit); // fetch all records
     const total = await Item.countDocuments();
 
-    console.log(res.data)
     res.status(200).json({ data: items, pagination:{ total, page, limit, totalPages: Math.ceil(total / limit)}});
     
   } catch (error) {

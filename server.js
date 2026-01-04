@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import roleRouter from "./routes/role.route.js";
 import rateLimit from "express-rate-limit";
 import getAllItems from './controllers/dummy.controller.js'
+import cors from "cors";
 
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 15 minutes
@@ -20,6 +21,12 @@ const port = 5000;
 const rbac = express.Router();
 app.use(express.json());
 app.use(cookieParser());
+
+app.use(cors({
+  origin: 'http://localhost:5173', // your frontend URL
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization']
+}));
 // app.use(limiter)  implements for the all the endpoints in the server.
 
 connectDB()
