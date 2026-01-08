@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import User from "../models/userSchema.js";
 import { authenticator } from "otplib";
 import qrCode from "qrcode";
-import { json } from "express";
+import jwt from 'jsonwebtoken';
 
 /** ###################################### User EndPoints ###################################### **/
 
@@ -67,8 +67,22 @@ export const loginUser   = async (req, res, next) => {
       
       const otpauthUrl = authenticator.keyuri(email, "RBACAuth", secret);
       const qrCodeDataUrl = await qrCode.toDataURL(otpauthUrl);
+
       return res.status(200).json({message:"Created user successfully ",qrImage:qrCodeDataUrl})
     }
+
+    
+      const adminExists = await User.findOneAndUpdate({
+          role: "admin",
+          isVerified: true
+        });
+        
+        if(!adminExists){
+          user.role = "admin"; // 👑 FIRST ADMIN
+        };
+
+      await user.save();
+
     return res.status(200).json({message:"Continue with totp verfication"})
 
   } catch (err) {

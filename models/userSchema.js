@@ -1,47 +1,67 @@
 import mongoose from "mongoose";
-import bcrypt from 'bcrypt';
-
+import bcrypt from "bcrypt";
 
 const userSchema = mongoose.Schema({
-    userName: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
-        lowercase: true,
-    },
-    password: {
-        type: String,
-        required: true,
-        minlength: 6
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-    isActive: {
-        type: Boolean,
-        default: false
-    },
-    totpVerified: {
-      type: Boolean,
-      default: false,
-    },
-    totpSecret: {
-      type: String
-    },
-    isTotpEnabled: {
-      type: Boolean
-    }
+  userName: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true,
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 6,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  isActive: {
+    type: Boolean,
+    default: false,
+  },
+  totpVerified: {
+    type: Boolean,
+    default: false,
+  },
+  totpSecret: {
+    type: String,
+  },
+  isTotpEnabled: {
+    type: Boolean,
+  },
+  isTicketOpen: {
+    type: Boolean,
+    default: false,
+  },
+  isCheckerApproved: {
+    type: Boolean,
+    default: false,
+  },
+  isMakerApproved: {
+    type: Boolean,
+    default: false,
+  },
+  role: {
+    type: String,
+    enum: ["admin", "user"],
+    default: "user",
+  },
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-userSchema.pre('save', async function (next) {
-  if (this.isModified('password')) {
+userSchema.pre("save", async function (next) {
+  if (this.isModified("password")) {
     this.password = await bcrypt.hash(this.password, 10);
   }
   next();
@@ -51,5 +71,5 @@ userSchema.methods.comparePassword = async function (password) {
   return bcrypt.compare(password, this.password);
 };
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 export default User;

@@ -8,6 +8,7 @@ import roleRouter from "./routes/role.route.js";
 import rateLimit from "express-rate-limit";
 import getAllItems from './controllers/dummy.controller.js'
 import cors from "cors";
+import adminRouter from "./routes/admin.route.js";
 
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 15 minutes
@@ -44,6 +45,7 @@ app.use(contextPath,rbac);
 rbac.use('/user', userRouter ) // User Route ...!
 rbac.use('/task', taskRouter ) // Tasks Route ...!
 rbac.use('/role', roleRouter ) // Roles Route ...!
+rbac.use('/admin', adminRouter ) // Roles Route ...!
 rbac.use('/pagination',dummyRouter)
 
 app.use((err, req, res, next) => {

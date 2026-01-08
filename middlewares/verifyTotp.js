@@ -28,7 +28,22 @@ export const verifyTotp = async (req, res, next) => {
 
   if(verifyToken && !user.isActive) return res.status(400).json({message:"User is InActive"})
   
-  return res.status(200).json({message: "Login successfully."})
+        const access_token = jwt.sign(
+        {
+          id: user._id,
+          role: user.role,
+          isVerified: user.isVerified
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "1h"
+        }
+      );
+      
+  return res.cookie(`access_token`,access_token,{
+      httpOnly:true,
+      secure:true
+    }).status(200).json({message: "Login successfully."})
 
 
     // // Generate JWT on successful verification
