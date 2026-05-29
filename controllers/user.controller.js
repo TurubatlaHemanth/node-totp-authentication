@@ -8,38 +8,49 @@ import jwt from 'jsonwebtoken';
 /** ###################################### User EndPoints ###################################### **/
 
 /** SignUp User */
-export const signUpUser  = async (req, res, next) => {
+import { sendMail } from '../utils/mailer.js';
+
+export const signUpUser = async (req, res, next) => {
   try {
     const { userName, email, password } = req.body;
-    
+
     if (!userName || !email || !password) {
-      return res.status(400).json({ message: "Username, email and password are required" });
+      return res.status(400).json({ message: 'Username, email and password are required' });
     }
 
     if (password.length < 6 || password.length > 15) {
-      return res.status(400).json({ message: "Password must be between 6–15 characters." });
+      return res.status(400).json({ message: 'Password must be between 6–15 characters.' });
     }
 
     if (await User.findOne({ email })) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({ message: 'User already exists' });
     }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     const newUser = new User({
       userName,
       email,
-      password,
+      password: hashedPassword,
       isTotpEnabled: false,
       isActive: false,
     });
-      const savedUser = await newUser.save();
 
-    res.status(201).json({
-      message: "User created successfully",
-    });
+    await newUser.save();
+
+    // Send welcome email (fire-and-forget)
+    sendMail({
+      to: email,
+      subject: 'Welcome to Our App!',
+      html: `<h1>Hi ${userName},</h1><p>Thanks for signing up. We're glad to have you!</p>`,
+    }).catch((err) => console.error('Failed to send welcome email:', err));
+
+    res.status(201).json({ message: 'User created successfully' });
   } catch (err) {
     next(err);
   }
 };
+
 
 /** Login User */
 export const loginUser   = async (req, res, next) => {

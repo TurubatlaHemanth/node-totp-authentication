@@ -21,11 +21,9 @@ const itemSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true } // adds createdAt & updatedAt automatically
+  { timestamps: true } 
 );
 
-// Create model
 const Item = mongoose.model("Item", itemSchema,"dummydata");
 
-// ✅ Export as default (ESM style)
 export default Item;
